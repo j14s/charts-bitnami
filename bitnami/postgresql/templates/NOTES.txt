@@ -52,9 +52,21 @@ To connect to your database from outside the cluster execute the following comma
 
 {{- include "postgresql.validateValues" . -}}
 
-{{- if and (contains "bitnami/" .Values.image.repository) (not (.Values.image.tag | toString | regexFind "-r\\d+$|sha256:")) }}
+{{- include "common.warnings.rollingTag" .Values.image -}}
 
-WARNING: Rolling tag detected ({{ .Values.image.repository }}:{{ .Values.image.tag }}), please note that it is strongly recommended to avoid using rolling tags in a production environment.
-+info https://docs.bitnami.com/containers/how-to/understand-rolling-tags-containers/
+{{- $secretName :=  include "postgresql.fullname" . -}}
 
-{{- end }}
+{{- $requiredPostgresqlPassword := dict "valueKey" "postgresqlPassword" "secret" $secretName "field" "postgresql-password" -}}
+{{- $requiredPasswords := list $requiredPostgresqlPassword -}}
+
+{{- if and .Values.postgresqlPostgresPassword (not (eq .Values.postgresqlUsername "postgres")) -}}
+    {{- $requiredPostgresqlPostgresPassword := dict "valueKey" "postgresqlPostgresPassword" "secret" $secretName "field" "postgresql-postgres-password" -}}
+    {{- $requiredPasswords = append $requiredPasswords $requiredPostgresqlPostgresPassword -}}
+{{- end -}}
+
+{{- if .Values.replication.enabled -}}
+    {{- $requiredPostgresqlReplicationPassword := dict "valueKey" "replication.password" "secret" $secretName "field" "postgresql-replication-password" -}}
+    {{- $requiredPasswords = append $requiredPasswords $requiredPostgresqlReplicationPassword -}}
+{{- end -}}
+
+{{- include "common.errors.upgrade.passwords.empty" (dict "required" $requiredPasswords "context" $) -}}
