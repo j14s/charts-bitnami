@@ -4,9 +4,9 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     tags:
       - bitnami-common
-  - name: mariadb
-    version: 7.x.x
-    repository: https://charts.bitnami.com/bitnami
-    condition: db.bundleTestDB
-    tags:
-      - phpmyadmin-database
+#  - name: mariadb
+#    version: 7.x.x
+#    repository: https://charts.bitnami.com/bitnami
+#    condition: db.bundleTestDB
+#    tags:
+#      - phpmyadmin-database
